@@ -18,7 +18,7 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
 
 @implementation AppDelegate
 
-- (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
+- (void)applicationDidFinishLaunching:(NSNotification*)notification {
   NSURLSession* session = [NSURLSession sharedSession];
 
   NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
@@ -26,8 +26,8 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
   NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
   NSString* targetAppName = [info valueForKey:@"TargetAppName"];
 
-  [self.window setTitle:[NSString stringWithFormat:@"%@ Installer", targetAppName]];
-  [self.label setStringValue:[NSString stringWithFormat:@"Downloading %@...", targetAppName]];
+  self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
+  self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
 
   NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL
                                            cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
@@ -41,9 +41,9 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
               }
 
               dispatch_async(dispatch_get_main_queue(), ^{
-                [self.label
-                    setStringValue:[NSString stringWithFormat:@"Installing %@...", targetAppName]];
-                [self.progressIndicator setIndeterminate:true];
+                self.label.stringValue =
+                    [NSString stringWithFormat:@"Installing %@...", targetAppName];
+                self.progressIndicator.indeterminate = true;
               });
 
               NSTask* task = [[NSTask alloc] init];
@@ -57,13 +57,12 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
                 [self launchInstalledApp];
               });
             }];
-
   [self.task resume];
 
-  [[self.task progress] addObserver:self
-                         forKeyPath:@"fractionCompleted"
-                            options:NSKeyValueObservingOptionNew
-                            context:nil];
+  [self.task.progress addObserver:self
+                       forKeyPath:@"fractionCompleted"
+                          options:NSKeyValueObservingOptionNew
+                          context:nil];
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath
@@ -73,12 +72,12 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
   if ([keyPath isEqual:@"fractionCompleted"]) {
     dispatch_async(dispatch_get_main_queue(), ^{
       const auto value = [[change valueForKey:NSKeyValueChangeNewKey] doubleValue];
-      [self.progressIndicator setDoubleValue:value];
+      self.progressIndicator.doubleValue = value;
     });
   }
 }
 
-- (void)applicationWillTerminate:(NSNotification*)aNotification {
+- (void)applicationWillTerminate:(NSNotification*)notification {
   [self.task cancel];
 }
 
