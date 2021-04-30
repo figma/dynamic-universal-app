@@ -9,6 +9,8 @@ instead of the real app. On launch, it will automatically download the
 architecture specific build of your app, replace itself with the real app, and
 finally switch over to the real app.
 
+<img width="512" alt="figma-dua" src="https://user-images.githubusercontent.com/1319028/116702718-1bd37000-a9d2-11eb-9f36-bf7ede60de1b.png">
+
 Compared to normal universal binaries or listing architecture specific
 download links, this has the following benefits:
 
