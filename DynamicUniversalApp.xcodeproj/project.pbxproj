@@ -21,7 +21,7 @@
 		27227270263AD71400AFC28A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		27227272263AD71400AFC28A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27227273263AD71400AFC28A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		27227275263AD71400AFC28A /* DynamicUniversalApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = DynamicUniversalApp.entitlements; path = DynamicUniversalApp/DynamicUniversalApp.entitlements; sourceTree = "<group>"; };
+		27227275263AD71400AFC28A /* DynamicUniversalApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DynamicUniversalApp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
