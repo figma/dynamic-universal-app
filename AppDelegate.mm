@@ -29,6 +29,7 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
   self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
   self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
 
+  // Fetch the platform specific build archive.
   NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL
                                            cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
                                        timeoutInterval:kDefaultTimeoutSecs];
@@ -36,6 +37,7 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
       downloadTaskWithRequest:request
             completionHandler:^(NSURL* location, NSURLResponse* response, NSError* error) {
               if (error) {
+                // TODO(poiru): Handle this.
                 NSLog(@"Failed to save: %@", error);
                 return;
               }
@@ -46,6 +48,12 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
                 self.progressIndicator.indeterminate = true;
               });
 
+              // Big Sur and later have APIs to extract archives, but we need
+              // to support older versions. Lets use plain old unzip to
+              // extract the downloaded archive.
+              //
+              // TODO(poiru): Support XZ archives.
+              // TODO(poiru): Handle error.
               NSTask* task = [[NSTask alloc] init];
               [task setLaunchPath:@"/usr/bin/unzip"];
               [task setArguments:@[ @"-qq", @"-o", @"-d", @"/Applications", location.path ]];
@@ -108,7 +116,9 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
     return;
   }
 
-  // Spawn a shell script to relaunch the installed app after we exit.
+  // Spawn a sh process to relaunch the installed app after we exit. Otherwise
+  // the new app might not launch if this stub app is already running at the
+  // path.
   NSTask* launchTask = [[NSTask alloc] init];
   [launchTask setLaunchPath:@"/bin/sh"];
   [launchTask setArguments:@[
