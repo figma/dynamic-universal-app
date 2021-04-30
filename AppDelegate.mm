@@ -1,5 +1,11 @@
 #import "AppDelegate.h"
 
+#ifdef __aarch64__
+#define ARCH_KEY_NAME @"aarch64"
+#else
+#define ARCH_KEY_NAME @"x86_64"
+#endif
+
 const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
 
 @interface AppDelegate ()
@@ -17,7 +23,7 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
 
   NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
   NSDictionary* downloadURLs = [info objectForKey:@"TargetDownloadURLs"];
-  NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:@"x86_64"]];
+  NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
   NSString* targetAppName = [info valueForKey:@"TargetAppName"];
 
   [self.window setTitle:[NSString stringWithFormat:@"%@ Installer", targetAppName]];
