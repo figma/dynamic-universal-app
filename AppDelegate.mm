@@ -1,5 +1,7 @@
 #import "AppDelegate.h"
 
+#include <sys/sysctl.h>
+
 #ifdef __aarch64__
 #define ARCH_KEY_NAME @"aarch64"
 #else
@@ -114,13 +116,47 @@ void showErrorModal(NSError* error) {
               // extract the downloaded archive.
               //
               // TODO(poiru): Support XZ archives.
-              // TODO(poiru): Handle error.
+              auto* fileManager = NSFileManager.defaultManager;
+              auto* tempDir = [fileManager.temporaryDirectory.path
+                  stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-download",
+                                                                            targetAppName]];
+
+              auto* sourcePath = [tempDir
+                  stringByAppendingPathComponent:[NSString
+                                                     stringWithFormat:@"%@.app", targetAppName]];
+              auto* targetPath = NSBundle.mainBundle.bundlePath;
+
               NSTask* task = [[NSTask alloc] init];
               [task setLaunchPath:@"/usr/bin/unzip"];
-              [task setArguments:@[ @"-qq", @"-o", @"-d", @"/Applications", location.path ]];
+              [task setArguments:@[ @"-qq", @"-o", @"-d", tempDir, downloadLocation.path ]];
               [task launch];
               [task waitUntilExit];
-              [[NSFileManager defaultManager] removeItemAtPath:location.path error:nil];
+              if (task.terminationStatus != 0) {
+                showErrorModal(
+                    [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
+              }
+
+              // Rename the final bundle in the temp directory to the target directory.
+              // Lets first try using the rename() system call because it can do that
+              // atomically even if the the target already exists.
+              if (rename(sourcePath.fileSystemRepresentation,
+                         targetPath.fileSystemRepresentation) != 0) {
+                // If rename() failed, we need to do this in two steps.
+                NSError* error = nil;
+                if ([fileManager fileExistsAtPath:targetPath] &&
+                    [fileManager removeItemAtPath:targetPath error:&error] != YES) {
+                  showErrorModal(error);
+                  return;
+                }
+
+                if ([fileManager moveItemAtPath:sourcePath toPath:targetPath error:&error] != YES) {
+                  showErrorModal(error);
+                  return;
+                }
+              }
+
+              [fileManager removeItemAtPath:downloadLocation.path error:nil];
+              [fileManager removeItemAtPath:tempDir error:nil];
 
               dispatch_async(dispatch_get_main_queue(), ^{
                 [self launchInstalledApp];
@@ -150,12 +186,6 @@ void showErrorModal(NSError* error) {
   [self.task cancel];
 }
 
-- (void)applicationDidBecomeActive:(NSNotification*)notification {
-  if (self.task.state == NSURLSessionTaskStateCompleted) {
-    [self launchInstalledApp];
-  }
-}
-
 - (IBAction)cancelClicked:(id)sender {
   [self.task cancel];
   [NSApp terminate:nullptr];
@@ -168,8 +198,9 @@ void showErrorModal(NSError* error) {
   NSTask* launchTask = [[NSTask alloc] init];
   [launchTask setLaunchPath:@"/bin/sh"];
   [launchTask setArguments:@[
-    @"-c", [NSString stringWithFormat:@"sleep 1; /usr/bin/open %s \"/Applications/%@.app\"",
-                                      self.window.isMainWindow ? "" : "-g", targetAppName]
+    @"-c",
+    [NSString stringWithFormat:@"sleep 1; /usr/bin/open %s \"%@\"",
+                               self.window.isMainWindow ? "" : "-g", NSBundle.mainBundle.bundlePath]
   ]];
   [launchTask launch];
   [NSApp terminate:nullptr];
