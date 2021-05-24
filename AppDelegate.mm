@@ -80,13 +80,27 @@ void showErrorModal(NSError* error) {
   NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL
                                            cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
                                        timeoutInterval:kDefaultTimeoutSecs];
-  self.task = [session
+  self.task = [NSURLSession.sharedSession
       downloadTaskWithRequest:request
-            completionHandler:^(NSURL* location, NSURLResponse* response, NSError* error) {
+            completionHandler:^(NSURL* downloadLocation, NSURLResponse* response, NSError* error) {
               if (error) {
-                // TODO(poiru): Handle this.
-                NSLog(@"Failed to save: %@", error);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  showErrorModal(error);
+                });
+
                 return;
+              }
+
+              if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+                const auto statusCode = ((NSHTTPURLResponse*)response).statusCode;
+                if (statusCode < 200 || statusCode >= 300) {
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                    showErrorModal(
+                        [NSString stringWithFormat:@"Failed to download, HTTP: %lu", statusCode]);
+                  });
+
+                  return;
+                }
               }
 
               dispatch_async(dispatch_get_main_queue(), ^{
