@@ -25,3 +25,27 @@ download links, this has the following benefits:
   compression ratios. DUA will optionally able to download the real app from
   an XZ package to reduce download time even further. For basic Electron apps,
   XZ reduces the download from 80MB to 60MB.
+
+### Packaging
+
+This needs to be automated, but here are manual steps:
+
+```sh
+xcodebuild -project DynamicUniversalApp.xcodeproj -configuration Release
+
+APP_DIR="build/Release/DynamicUniversalApp.app"
+INFO_PLIST="$APP_DIR/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c 'set CFBundleIdentifier com.figma.desktop.dynamic-universal-app' "$INFO_PLIST"
+/usr/libexec/PlistBuddy -c 'set TargetAppName Figma' "$INFO_PLIST"
+/usr/libexec/PlistBuddy -c 'set TargetDownloadURLs:aarch64 https://desktop.figma.com/mac-arm/Figma.zip' "$INFO_PLIST"
+/usr/libexec/PlistBuddy -c 'set TargetDownloadURLs:x86_64 https://desktop.figma.com/mac/Figma.zip' "$INFO_PLIST"
+
+/usr/libexec/PlistBuddy -c 'add CFBundleIconFile string icon.icns' "$INFO_PLIST"
+cp /path/to/icon.icns "$APP_DIR/Contents/Resources/icon.icns"
+
+mv DynamicUniversalApp.app Figma.app
+
+codesign --force --options=runtime --timestamp --sign "Developer ID Application: ..." Figma.app
+cd ~/figma/figma/desktop
+node scripts/notarize.js com.figma.desktop.dynamic-universal-app "$APP_DIR"
+```
