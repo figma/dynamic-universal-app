@@ -56,7 +56,7 @@ void showErrorModal(NSError* error) {
 
 @implementation AppDelegate
 
-- (void)applicationDidFinishLaunching:(NSNotification*)notification {
+- (void)applicationWillFinishLaunching:(NSNotification*)notification {
   // On macOS 10.12+, app bundles downloaded from the internet are launched
   // from a randomized path until the user moves it to another folder with
   // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
@@ -82,7 +82,9 @@ void showErrorModal(NSError* error) {
         [NSString stringWithFormat:@"Initial check failed: %i", checkTask.terminationStatus]);
     return;
   }
+}
 
+- (void)applicationDidFinishLaunching:(NSNotification*)notification {
   NSDictionary* info = NSBundle.mainBundle.infoDictionary;
   NSDictionary* downloadURLs = [info objectForKey:@"TargetDownloadURLs"];
   NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
@@ -90,6 +92,7 @@ void showErrorModal(NSError* error) {
 
   self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
   self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
+  [self.window setIsVisible:TRUE];
 
   // Fetch the platform specific build archive.
   NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL
