@@ -8,6 +8,42 @@
 
 const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
 
+void showErrorModal(NSString* errorDecription) {
+  NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
+  NSDictionary* downloadURLs = [info objectForKey:@"TargetDownloadURLs"];
+  NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
+  NSString* targetAppName = [info valueForKey:@"TargetAppName"];
+
+  NSString* errorText = @"";
+  if (errorDecription) {
+    errorText = [NSString stringWithFormat:@"\n\nYou may also contact %@ support with this error "
+                                           @"information:\n\n%@",
+                                           targetAppName, errorDecription];
+  }
+
+  NSAlert* alert = [[NSAlert alloc] init];
+  [alert addButtonWithTitle:@"Download manually"];
+  [alert addButtonWithTitle:@"Cancel"];
+  [alert setMessageText:[NSString
+                            stringWithFormat:@"%@ Automatic Installation Failed", targetAppName]];
+  [alert setInformativeText:[NSString stringWithFormat:@"Download %@ manually to continue.%@",
+                                                       targetAppName, errorText]];
+  [alert setAlertStyle:NSAlertStyleCritical];
+
+  [NSApp activateIgnoringOtherApps:YES];
+  if ([alert runModal] == NSAlertFirstButtonReturn) {
+    [[NSWorkspace sharedWorkspace] openURL:downloadURL];
+  }
+
+  [NSApp terminate:nullptr];
+}
+
+void showErrorModal(NSError* error) {
+  auto* errorDescription =
+      [NSString stringWithFormat:@"%@ (code %ld)", error.localizedDescription, error.code];
+  showErrorModal(errorDescription);
+}
+
 @interface AppDelegate ()
 @property(weak) IBOutlet NSWindow* window;
 @property(weak) IBOutlet NSTextField* label;
@@ -19,9 +55,20 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
-  NSURLSession* session = [NSURLSession sharedSession];
+  // First check if trying to run `sh -c ...` works. We'll be using it at
+  // the end to relaunch the app.
+  NSTask* checkTask = [[NSTask alloc] init];
+  [checkTask setLaunchPath:@"/bin/sh"];
+  [checkTask setArguments:@[ @"-c", @"sleep 0 && which open && which unzip" ]];
+  [checkTask launch];
+  [checkTask waitUntilExit];
+  if (checkTask.terminationStatus != 0) {
+    showErrorModal(
+        [NSString stringWithFormat:@"Initial check failed: %i", checkTask.terminationStatus]);
+    return;
+  }
 
-  NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
+  NSDictionary* info = NSBundle.mainBundle.infoDictionary;
   NSDictionary* downloadURLs = [info objectForKey:@"TargetDownloadURLs"];
   NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
   NSString* targetAppName = [info valueForKey:@"TargetAppName"];
@@ -101,21 +148,6 @@ const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
 }
 
 - (void)launchInstalledApp {
-  NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
-  NSString* targetAppName = [info valueForKey:@"TargetAppName"];
-
-  // First check if trying to run `sh -c ...` works.
-  NSTask* checkTask = [[NSTask alloc] init];
-  [checkTask setLaunchPath:@"/bin/sh"];
-  [checkTask setArguments:@[ @"-c", @"sleep 0 && which open" ]];
-  [checkTask launch];
-  [checkTask waitUntilExit];
-  if (checkTask.terminationStatus != 0) {
-    // TODO(poiru): Handle this.
-    [NSApp terminate:nullptr];
-    return;
-  }
-
   // Spawn a sh process to relaunch the installed app after we exit. Otherwise
   // the new app might not launch if this stub app is already running at the
   // path.
