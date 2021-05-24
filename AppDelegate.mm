@@ -124,7 +124,6 @@ void showErrorModal(NSError* error) {
               dispatch_async(dispatch_get_main_queue(), ^{
                 self.label.stringValue =
                     [NSString stringWithFormat:@"Installing %@...", targetAppName];
-                self.progressIndicator.indeterminate = true;
               });
 
               // Big Sur and later have APIs to extract archives, but we need
@@ -193,7 +192,7 @@ void showErrorModal(NSError* error) {
   if ([keyPath isEqual:@"fractionCompleted"]) {
     dispatch_async(dispatch_get_main_queue(), ^{
       const auto value = [[change valueForKey:NSKeyValueChangeNewKey] doubleValue];
-      self.progressIndicator.doubleValue = value;
+      self.progressIndicator.doubleValue = fmax(self.progressIndicator.doubleValue, value * 0.95);
     });
   }
 }
