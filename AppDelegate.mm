@@ -57,6 +57,19 @@ void showErrorModal(NSError* error) {
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
+  // On macOS 10.12+, app bundles downloaded from the internet are launched
+  // from a randomized path until the user moves it to another folder with
+  // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
+  if (![NSFileManager.defaultManager isWritableFileAtPath:NSBundle.mainBundle.bundlePath]) {
+    NSAlert* alert = [[NSAlert alloc] init];
+    [alert addButtonWithTitle:@"OK"];
+    [alert setMessageText:@"Move to Applications Folder"];
+    [alert setInformativeText:@"Please move the Figma app into the Applications folder and try again.\n\nIf the app is already in the Applications folder, drag it into some other folder and then back into Applications."];
+    [alert setAlertStyle:NSAlertStyleCritical];
+    [alert runModal];
+    [NSApp terminate:nullptr];
+  }
+
   // First check if trying to run `sh -c ...` works. We'll be using it at
   // the end to relaunch the app.
   NSTask* checkTask = [[NSTask alloc] init];
@@ -93,7 +106,7 @@ void showErrorModal(NSError* error) {
                 return;
               }
 
-              if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+              if ([response isKindOfClass:NSHTTPURLResponse.class]) {
                 const auto statusCode = ((NSHTTPURLResponse*)response).statusCode;
                 if (statusCode < 200 || statusCode >= 300) {
                   dispatch_async(dispatch_get_main_queue(), ^{
