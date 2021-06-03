@@ -64,7 +64,9 @@ void showErrorModal(NSError* error) {
     NSAlert* alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert setMessageText:@"Move to Applications Folder"];
-    [alert setInformativeText:@"Please move the Figma app into the Applications folder and try again.\n\nIf the app is already in the Applications folder, drag it into some other folder and then back into Applications."];
+    [alert setInformativeText:@"Please move the Figma app into the Applications folder and try "
+                              @"again.\n\nIf the app is already in the Applications folder, drag "
+                              @"it into some other folder and then back into Applications."];
     [alert setAlertStyle:NSAlertStyleCritical];
     [alert runModal];
     [NSApp terminate:nullptr];
@@ -147,8 +149,11 @@ void showErrorModal(NSError* error) {
               [task launch];
               [task waitUntilExit];
               if (task.terminationStatus != 0) {
-                showErrorModal(
-                    [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  showErrorModal(
+                      [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
+                });
+                return;
               }
 
               // Rename the final bundle in the temp directory to the target directory.
@@ -160,12 +165,16 @@ void showErrorModal(NSError* error) {
                 NSError* error = nil;
                 if ([fileManager fileExistsAtPath:targetPath] &&
                     [fileManager removeItemAtPath:targetPath error:&error] != YES) {
-                  showErrorModal(error);
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                    showErrorModal(error);
+                  });
                   return;
                 }
 
                 if ([fileManager moveItemAtPath:sourcePath toPath:targetPath error:&error] != YES) {
-                  showErrorModal(error);
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                    showErrorModal(error);
+                  });
                   return;
                 }
               }
