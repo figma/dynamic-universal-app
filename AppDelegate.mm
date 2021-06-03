@@ -179,10 +179,14 @@ void showErrorModal(NSError* error) {
             }];
   [self.task resume];
 
-  [self.task.progress addObserver:self
-                       forKeyPath:@"fractionCompleted"
-                          options:NSKeyValueObservingOptionNew
-                          context:nil];
+  if (@available(macOS 10.13, *)) {
+    [self.task.progress addObserver:self
+                         forKeyPath:@"fractionCompleted"
+                            options:NSKeyValueObservingOptionNew
+                            context:nil];
+  } else {
+    self.progressIndicator.indeterminate = TRUE;
+  }
 }
 
 - (void)observeValueForKeyPath:(NSString*)keyPath
