@@ -95,7 +95,9 @@ void showErrorModal(NSError* error) {
 
   self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
   self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
+
   [self.window setIsVisible:TRUE];
+  [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
 
   // Fetch the platform specific build archive.
   NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL
