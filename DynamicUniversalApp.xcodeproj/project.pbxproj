@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2722726C263AD71300AFC28A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2722726B263AD71300AFC28A /* AppDelegate.mm */; };
 		27227274263AD71400AFC28A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 27227273263AD71400AFC28A /* main.m */; };
+		27BF31042668EF7F001B8384 /* STPrivilegedTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 27BF31032668EF7F001B8384 /* STPrivilegedTask.m */; };
 		27D3053E263D28BC00BBEBA5 /* App.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27227270263AD71400AFC28A /* App.xib */; };
 /* End PBXBuildFile section */
 
@@ -19,6 +20,7 @@
 		27227270263AD71400AFC28A /* App.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = App.xib; sourceTree = "<group>"; };
 		27227272263AD71400AFC28A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27227273263AD71400AFC28A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		27BF31032668EF7F001B8384 /* STPrivilegedTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPrivilegedTask.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +41,7 @@
 				2722726B263AD71300AFC28A /* AppDelegate.mm */,
 				27227270263AD71400AFC28A /* App.xib */,
 				27227272263AD71400AFC28A /* Info.plist */,
+				27BF31032668EF7F001B8384 /* STPrivilegedTask.m */,
 				27227273263AD71400AFC28A /* main.m */,
 				27227268263AD71300AFC28A /* Products */,
 			);
@@ -122,6 +125,7 @@
 			files = (
 				27227274263AD71400AFC28A /* main.m in Sources */,
 				2722726C263AD71300AFC28A /* AppDelegate.mm in Sources */,
+				27BF31042668EF7F001B8384 /* STPrivilegedTask.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

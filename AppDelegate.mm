@@ -1,4 +1,5 @@
 #import "AppDelegate.h"
+#import "STPrivilegedTask.h"
 
 #include <sys/sysctl.h>
 
@@ -60,7 +61,7 @@ void showErrorModal(NSError* error) {
   // On macOS 10.12+, app bundles downloaded from the internet are launched
   // from a randomized path until the user moves it to another folder with
   // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
-  if (![NSFileManager.defaultManager isWritableFileAtPath:NSBundle.mainBundle.bundlePath]) {
+  if ([NSBundle.mainBundle.bundlePath hasPrefix:@"/private/var/folders/"]) {
     NSAlert* alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert setMessageText:@"Move to Applications Folder"];
@@ -148,7 +149,11 @@ void showErrorModal(NSError* error) {
               [task setArguments:@[ @"-qq", @"-o", @"-d", tempDir, downloadLocation.path ]];
               [task launch];
               [task waitUntilExit];
+              [fileManager removeItemAtPath:downloadLocation.path error:nil];
+
               if (task.terminationStatus != 0) {
+                [fileManager removeItemAtPath:tempDir error:nil];
+
                 dispatch_async(dispatch_get_main_queue(), ^{
                   showErrorModal(
                       [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
@@ -161,25 +166,33 @@ void showErrorModal(NSError* error) {
               // atomically even if the the target already exists.
               if (rename(sourcePath.fileSystemRepresentation,
                          targetPath.fileSystemRepresentation) != 0) {
-                // If rename() failed, we need to do this in two steps.
-                NSError* error = nil;
-                if ([fileManager fileExistsAtPath:targetPath] &&
-                    [fileManager removeItemAtPath:targetPath error:&error] != YES) {
-                  dispatch_async(dispatch_get_main_queue(), ^{
-                    showErrorModal(error);
-                  });
-                  return;
-                }
+                // If rename() failed, try to do this in two steps.
+                NSError* moveError = nil;
+                if (([fileManager fileExistsAtPath:targetPath] &&
+                     [fileManager removeItemAtPath:targetPath error:&moveError] != YES) ||
+                    [fileManager moveItemAtPath:sourcePath toPath:targetPath
+                                          error:&moveError] != YES) {
+                  // If that failed too, as a last resort, try to do this as admin.
+                  STPrivilegedTask* moveTask = [[STPrivilegedTask alloc] init];
+                  [moveTask setLaunchPath:@"/bin/sh"];
+                  [moveTask setArguments:@[
+                    @"-c", [NSString stringWithFormat:@"rm -rf \"%@\" && mv \"%@\" \"%@\"",
+                                                      targetPath, sourcePath, targetPath]
+                  ]];
 
-                if ([fileManager moveItemAtPath:sourcePath toPath:targetPath error:&error] != YES) {
-                  dispatch_async(dispatch_get_main_queue(), ^{
-                    showErrorModal(error);
-                  });
-                  return;
+                  [moveTask launch];
+                  [moveTask waitUntilExit];
+                  if (moveTask.terminationStatus != 0) {
+                    [fileManager removeItemAtPath:tempDir error:nil];
+
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                      showErrorModal(moveError);
+                    });
+                    return;
+                  }
                 }
               }
 
-              [fileManager removeItemAtPath:downloadLocation.path error:nil];
               [fileManager removeItemAtPath:tempDir error:nil];
 
               dispatch_async(dispatch_get_main_queue(), ^{
