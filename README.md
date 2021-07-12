@@ -26,6 +26,12 @@ download links, this has the following benefits:
   an XZ package to reduce download time even further. For basic Electron apps,
   XZ reduces the download from 80MB to 60MB.
 
+### Notes
+
+DUA will not work for enterprise deployments where the end-users do not have
+write access to `/Applications`. You will likely want to provide direct links
+to architecture-specfic builds somewheree for use by enterprise admins.
+
 ### Packaging
 
 This needs to be automated, but here are manual steps:
