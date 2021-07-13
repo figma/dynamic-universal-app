@@ -62,12 +62,16 @@ void showErrorModal(NSError* error) {
   // from a randomized path until the user moves it to another folder with
   // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
   if ([NSBundle.mainBundle.bundlePath hasPrefix:@"/private/var/folders/"]) {
+    NSDictionary* info = NSBundle.mainBundle.infoDictionary;
+    NSString* targetAppName = [info valueForKey:@"TargetAppName"];
+
     NSAlert* alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert setMessageText:@"Move to Applications Folder"];
-    [alert setInformativeText:@"Please move the Figma app into the Applications folder and try "
-                              @"again.\n\nIf the app is already in the Applications folder, drag "
-                              @"it into some other folder and then back into Applications."];
+    [alert setInformativeText:[NSString stringWithFormat:@"Please move the %@ app into the Applications folder and try "
+                                                         @"again.\n\nIf the app is already in the Applications folder, drag "
+                                                         @"it into some other folder and then back into Applications.", 
+                                                         targetAppName]];
     [alert setAlertStyle:NSAlertStyleCritical];
     [alert runModal];
     [NSApp terminate:nullptr];
