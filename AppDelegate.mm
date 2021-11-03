@@ -68,10 +68,12 @@ void showErrorModal(NSError* error) {
     NSAlert* alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert setMessageText:@"Move to Applications Folder"];
-    [alert setInformativeText:[NSString stringWithFormat:@"Please move the %@ app into the Applications folder and try "
-                                                         @"again.\n\nIf the app is already in the Applications folder, drag "
-                                                         @"it into some other folder and then back into Applications.", 
-                                                         targetAppName]];
+    [alert setInformativeText:
+               [NSString stringWithFormat:
+                             @"Please move the %@ app into the Applications folder and try "
+                             @"again.\n\nIf the app is already in the Applications folder, drag "
+                             @"it into some other folder and then back into Applications.",
+                             targetAppName]];
     [alert setAlertStyle:NSAlertStyleCritical];
     [alert runModal];
     [NSApp terminate:nullptr];
@@ -141,24 +143,31 @@ void showErrorModal(NSError* error) {
               //
               // TODO(poiru): Support XZ archives.
               auto* fileManager = NSFileManager.defaultManager;
-              auto* tempDir = [fileManager.temporaryDirectory.path
-                  stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-download",
-                                                                            targetAppName]];
+              auto* tempDir = [fileManager URLForDirectory:NSItemReplacementDirectory
+                                                  inDomain:NSUserDomainMask
+                                         appropriateForURL:NSBundle.mainBundle.bundleURL
+                                                    create:YES
+                                                     error:&error];
+              if (error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  showErrorModal(error);
+                });
+              }
 
-              auto* sourcePath = [tempDir
+              auto* sourcePath = [tempDir.path
                   stringByAppendingPathComponent:[NSString
                                                      stringWithFormat:@"%@.app", targetAppName]];
               auto* targetPath = NSBundle.mainBundle.bundlePath;
 
               NSTask* task = [[NSTask alloc] init];
               [task setLaunchPath:@"/usr/bin/unzip"];
-              [task setArguments:@[ @"-qq", @"-o", @"-d", tempDir, downloadLocation.path ]];
+              [task setArguments:@[ @"-qq", @"-o", @"-d", tempDir.path, downloadLocation.path ]];
               [task launch];
               [task waitUntilExit];
               [fileManager removeItemAtPath:downloadLocation.path error:nil];
 
               if (task.terminationStatus != 0) {
-                [fileManager removeItemAtPath:tempDir error:nil];
+                [fileManager removeItemAtURL:tempDir error:nil];
 
                 dispatch_async(dispatch_get_main_queue(), ^{
                   showErrorModal(
@@ -189,7 +198,7 @@ void showErrorModal(NSError* error) {
                   [moveTask launch];
                   [moveTask waitUntilExit];
                   if (moveTask.terminationStatus != 0) {
-                    [fileManager removeItemAtPath:tempDir error:nil];
+                    [fileManager removeItemAtURL:tempDir error:nil];
 
                     dispatch_async(dispatch_get_main_queue(), ^{
                       showErrorModal(moveError);
@@ -199,7 +208,7 @@ void showErrorModal(NSError* error) {
                 }
               }
 
-              [fileManager removeItemAtPath:tempDir error:nil];
+              [fileManager removeItemAtURL:tempDir error:nil];
 
               dispatch_async(dispatch_get_main_queue(), ^{
                 [self launchInstalledApp];
