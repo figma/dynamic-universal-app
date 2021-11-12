@@ -47,6 +47,39 @@ void showErrorModal(NSError* error) {
   showErrorModal(errorDescription);
 }
 
+bool tryMove(NSFileManager* fileManager, NSString* sourcePath, NSString* targetPath) {
+  // Rename the final bundle in the temp directory to the target directory.
+  // Lets first try using the rename() system call because it can do that
+  // atomically even if the the target already exists.
+  if (rename(sourcePath.fileSystemRepresentation, targetPath.fileSystemRepresentation) == 0) {
+    return true;
+  }
+
+  // If rename() failed, try to do this in two steps.
+  NSError* moveError = nil;
+  if (([fileManager fileExistsAtPath:targetPath] &&
+       [fileManager removeItemAtPath:targetPath error:&moveError] != YES) ||
+      [fileManager moveItemAtPath:sourcePath toPath:targetPath error:&moveError] != YES) {
+    // If that failed too, as a last resort, try to do this as admin.
+    STPrivilegedTask* moveTask = [[STPrivilegedTask alloc] init];
+    [moveTask setLaunchPath:@"/bin/sh"];
+    [moveTask setArguments:@[
+      @"-c", [NSString stringWithFormat:@"rm -rf \"%@\" && mv \"%@\" \"%@\"", targetPath,
+                                        sourcePath, targetPath]
+    ]];
+
+    [moveTask launch];
+    [moveTask waitUntilExit];
+    if (moveTask.terminationStatus != 0) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        showErrorModal(moveError);
+      });
+      return false;
+    }
+  }
+  return true;
+}
+
 @interface AppDelegate ()
 @property(weak) IBOutlet NSWindow* window;
 @property(weak) IBOutlet NSTextField* label;
@@ -68,10 +101,12 @@ void showErrorModal(NSError* error) {
     NSAlert* alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert setMessageText:@"Move to Applications Folder"];
-    [alert setInformativeText:[NSString stringWithFormat:@"Please move the %@ app into the Applications folder and try "
-                                                         @"again.\n\nIf the app is already in the Applications folder, drag "
-                                                         @"it into some other folder and then back into Applications.", 
-                                                         targetAppName]];
+    [alert setInformativeText:
+               [NSString stringWithFormat:
+                             @"Please move the %@ app into the Applications folder and try "
+                             @"again.\n\nIf the app is already in the Applications folder, drag "
+                             @"it into some other folder and then back into Applications.",
+                             targetAppName]];
     [alert setAlertStyle:NSAlertStyleCritical];
     [alert runModal];
     [NSApp terminate:nullptr];
@@ -96,6 +131,14 @@ void showErrorModal(NSError* error) {
   NSDictionary* downloadURLs = [info objectForKey:@"TargetDownloadURLs"];
   NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
   NSString* targetAppName = [info valueForKey:@"TargetAppName"];
+  auto* tempDir = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"download"];
+  auto* fileManager = NSFileManager.defaultManager;
+
+  // Will be true if installer has failed before
+  BOOL folderExists = [fileManager fileExistsAtPath:tempDir];
+  if (folderExists) {
+    showErrorModal(@"Looks like your last installation did not complete.");
+  }
 
   self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
   self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
@@ -140,14 +183,12 @@ void showErrorModal(NSError* error) {
               // extract the downloaded archive.
               //
               // TODO(poiru): Support XZ archives.
-              auto* fileManager = NSFileManager.defaultManager;
-              auto* tempDir = [fileManager.temporaryDirectory.path
-                  stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-download",
-                                                                            targetAppName]];
-
               auto* sourcePath = [tempDir
                   stringByAppendingPathComponent:[NSString
                                                      stringWithFormat:@"%@.app", targetAppName]];
+              auto* interimPath =
+                  [[NSBundle.mainBundle.bundlePath stringByDeletingLastPathComponent]
+                      stringByAppendingPathComponent:@"Figma.app.install"];
               auto* targetPath = NSBundle.mainBundle.bundlePath;
 
               NSTask* task = [[NSTask alloc] init];
@@ -167,37 +208,8 @@ void showErrorModal(NSError* error) {
                 return;
               }
 
-              // Rename the final bundle in the temp directory to the target directory.
-              // Lets first try using the rename() system call because it can do that
-              // atomically even if the the target already exists.
-              if (rename(sourcePath.fileSystemRepresentation,
-                         targetPath.fileSystemRepresentation) != 0) {
-                // If rename() failed, try to do this in two steps.
-                NSError* moveError = nil;
-                if (([fileManager fileExistsAtPath:targetPath] &&
-                     [fileManager removeItemAtPath:targetPath error:&moveError] != YES) ||
-                    [fileManager moveItemAtPath:sourcePath toPath:targetPath
-                                          error:&moveError] != YES) {
-                  // If that failed too, as a last resort, try to do this as admin.
-                  STPrivilegedTask* moveTask = [[STPrivilegedTask alloc] init];
-                  [moveTask setLaunchPath:@"/bin/sh"];
-                  [moveTask setArguments:@[
-                    @"-c", [NSString stringWithFormat:@"rm -rf \"%@\" && mv \"%@\" \"%@\"",
-                                                      targetPath, sourcePath, targetPath]
-                  ]];
-
-                  [moveTask launch];
-                  [moveTask waitUntilExit];
-                  if (moveTask.terminationStatus != 0) {
-                    [fileManager removeItemAtPath:tempDir error:nil];
-
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                      showErrorModal(moveError);
-                    });
-                    return;
-                  }
-                }
-              }
+              tryMove(fileManager, sourcePath, interimPath);
+              tryMove(fileManager, interimPath, targetPath);
 
               [fileManager removeItemAtPath:tempDir error:nil];
 
