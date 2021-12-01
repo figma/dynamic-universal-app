@@ -47,6 +47,36 @@ void showErrorModal(NSError* error) {
   showErrorModal(errorDescription);
 }
 
+bool tryUnzip(NSFileManager* fileManager, NSString* source, NSString* target) {
+  auto unzip = @"/usr/bin/unzip";
+  auto unzipArgs = @[ @"-qq", @"-o", @"-d", target, source ];
+  NSTask* task = [[NSTask alloc] init];
+  [task setLaunchPath:unzip];
+  [task setArguments:unzipArgs];
+  [task launch];
+  [task waitUntilExit];
+  auto result = task.terminationStatus;
+  if (task.terminationStatus != 0) {
+    STPrivilegedTask* privilegedTask = [[STPrivilegedTask alloc] init];
+    [privilegedTask setLaunchPath:unzip];
+    [privilegedTask setArguments:unzipArgs];
+    [privilegedTask launch];
+    [privilegedTask waitUntilExit];
+    result = privilegedTask.terminationStatus;
+  }
+
+  [fileManager removeItemAtPath:source error:nil];
+
+  if (result != 0) {
+    [fileManager removeItemAtPath:target error:nil];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+      showErrorModal([NSString stringWithFormat:@"Failed to extract: %i", result]);
+    });
+  }
+  return result == 0;
+}
+
 bool tryMove(NSFileManager* fileManager, NSString* sourcePath, NSString* targetPath) {
   // Rename the final bundle in the temp directory to the target directory.
   // Lets first try using the rename() system call because it can do that
@@ -76,6 +106,13 @@ bool tryMove(NSFileManager* fileManager, NSString* sourcePath, NSString* targetP
       });
       return false;
     }
+    return true;
+  }
+  if (moveError != nil) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      showErrorModal(moveError);
+    });
+    return false;
   }
   return true;
 }
@@ -190,28 +227,9 @@ bool tryMove(NSFileManager* fileManager, NSString* sourcePath, NSString* targetP
                   [[NSBundle.mainBundle.bundlePath stringByDeletingLastPathComponent]
                       stringByAppendingPathComponent:@"Figma.app.install"];
               auto* targetPath = NSBundle.mainBundle.bundlePath;
-
-              NSTask* task = [[NSTask alloc] init];
-              [task setLaunchPath:@"/usr/bin/unzip"];
-              [task setArguments:@[ @"-qq", @"-o", @"-d", tempDir, downloadLocation.path ]];
-              [task launch];
-              [task waitUntilExit];
-              [fileManager removeItemAtPath:downloadLocation.path error:nil];
-
-              if (task.terminationStatus != 0) {
-                [fileManager removeItemAtPath:tempDir error:nil];
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                  showErrorModal(
-                      [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
-                });
-                return;
-              }
-
-              tryMove(fileManager, sourcePath, interimPath);
-              tryMove(fileManager, interimPath, targetPath);
-
-              [fileManager removeItemAtPath:tempDir error:nil];
+              if (!tryUnzip(fileManager, downloadLocation.path, tempDir)) return;
+              if (!tryMove(fileManager, sourcePath, interimPath)) return;
+              if (!tryMove(fileManager, interimPath, targetPath)) return;
 
               dispatch_async(dispatch_get_main_queue(), ^{
                 [self launchInstalledApp];
