@@ -141,14 +141,7 @@ void showErrorModal(NSError* error) {
               //
               // TODO(poiru): Support XZ archives.
               auto* fileManager = NSFileManager.defaultManager;
-              auto* tempDir = [fileManager.temporaryDirectory.path
-                  stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-download",
-                                                                            targetAppName]];
-
-              auto* sourcePath = [tempDir
-                  stringByAppendingPathComponent:[NSString
-                                                     stringWithFormat:@"%@.app", targetAppName]];
-              auto* targetPath = NSBundle.mainBundle.bundlePath;
+              auto* tempDir = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"download"];
 
               NSTask* task = [[NSTask alloc] init];
               [task setLaunchPath:@"/usr/bin/unzip"];
@@ -159,44 +152,55 @@ void showErrorModal(NSError* error) {
 
               if (task.terminationStatus != 0) {
                 [fileManager removeItemAtPath:tempDir error:nil];
-
-                dispatch_async(dispatch_get_main_queue(), ^{
-                  showErrorModal(
-                      [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
-                });
+                
+                // If extraction fails, it's likely to be a permission issue let's rerun the program as root
+                
+                if (geteuid() != 0) {
+                  STPrivilegedTask* task = [STPrivilegedTask new];
+                  [task setLaunchPath:[NSBundle.mainBundle executablePath]];
+                  [task launch];
+                } else {
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                    showErrorModal(
+                                   [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
+                  });
+                }
                 return;
               }
 
+    
+              auto* sourcePath = [tempDir
+                                  stringByAppendingPathComponent:[NSString
+                                                                  stringWithFormat:@"%@.app", targetAppName]];
+              auto* targetPath = NSBundle.mainBundle.bundlePath;
               // Rename the final bundle in the temp directory to the target directory.
               // Lets first try using the rename() system call because it can do that
               // atomically even if the the target already exists.
               if (rename(sourcePath.fileSystemRepresentation,
                          targetPath.fileSystemRepresentation) != 0) {
-                // If rename() failed, try to do this in two steps.
-                NSError* moveError = nil;
-                if (([fileManager fileExistsAtPath:targetPath] &&
-                     [fileManager removeItemAtPath:targetPath error:&moveError] != YES) ||
-                    [fileManager moveItemAtPath:sourcePath toPath:targetPath
-                                          error:&moveError] != YES) {
-                  // If that failed too, as a last resort, try to do this as admin.
-                  STPrivilegedTask* moveTask = [[STPrivilegedTask alloc] init];
-                  [moveTask setLaunchPath:@"/bin/sh"];
-                  [moveTask setArguments:@[
-                    @"-c", [NSString stringWithFormat:@"rm -rf \"%@\" && mv \"%@\" \"%@\"",
-                                                      targetPath, sourcePath, targetPath]
-                  ]];
-
-                  [moveTask launch];
-                  [moveTask waitUntilExit];
-                  if (moveTask.terminationStatus != 0) {
-                    [fileManager removeItemAtPath:tempDir error:nil];
-
+                
+                // If rename() failed, try to do this by moving the contents instead
+                NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:sourcePath];
+                NSString *file;
+                
+                while (file = [enumerator nextObject]) {
+                  NSError *error = nil;
+                  BOOL result = rename([sourcePath stringByAppendingPathComponent:file].fileSystemRepresentation, [targetPath stringByAppendingPathComponent:file].fileSystemRepresentation);
+                  
+                  if (!result && error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                      showErrorModal(moveError);
+                      showErrorModal(error);
                     });
-                    return;
                   }
                 }
+                NSTask* task = [[NSTask alloc] init];
+                [task setLaunchPath:@"/usr/bin/touch"];
+                [task setArguments:@[ NSBundle.mainBundle.bundlePath ]];
+                [task launch];
+                [task waitUntilExit];
+                [task setArguments:@[ [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"Contents/Info.plist"]]];
+                [task launch];
+                [task waitUntilExit];
               }
 
               [fileManager removeItemAtPath:tempDir error:nil];
