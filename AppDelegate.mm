@@ -205,6 +205,8 @@ void showErrorModal(NSError* error) {
                     });
                   }
                 }
+                
+                // Trigger icon updation
                 runCommand(@"/usr/bin/touch", @[ NSBundle.mainBundle.bundlePath ]);
                 runCommand(@"/usr/bin/touch",
                            @[ [NSBundle.mainBundle.bundlePath
