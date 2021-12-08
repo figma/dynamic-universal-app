@@ -208,6 +208,9 @@ bool checkPermission() {
               if (rename(sourcePath.fileSystemRepresentation,
                          targetPath.fileSystemRepresentation) != 0) {
                 // If rename() failed, try to do this by moving the contents instead
+                // Advantage of this approach is that we don't need any special permissions if the user is the owner of the folder (User initiated drag and drop)
+                // Disadvantage of this approach is that the metadata update isn't reliable, if the icon of the app and the replaced app are different, user may need a restart before the icon updates in the dock.
+                
                 NSDirectoryEnumerator* enumerator = [fileManager enumeratorAtPath:sourcePath];
                 NSString* file;
 
