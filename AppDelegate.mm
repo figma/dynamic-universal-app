@@ -55,6 +55,18 @@ void showErrorModal(NSError* error) {
   showErrorModal(errorDescription);
 }
 
+bool checkPermission() {
+  auto* testDir = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"test"];
+  auto* fileManager = NSFileManager.defaultManager;
+  bool result = [fileManager createDirectoryAtPath:testDir withIntermediateDirectories:true attributes:NULL error:NULL];
+  if (result) {
+    [fileManager removeItemAtPath:testDir error:NULL];
+    return true;
+  } else {
+    return false;
+  }
+}
+
 @interface AppDelegate ()
 @property(weak) IBOutlet NSWindow* window;
 @property(weak) IBOutlet NSTextField* label;
@@ -107,6 +119,22 @@ void showErrorModal(NSError* error) {
   NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
   NSString* targetAppName = [info valueForKey:@"TargetAppName"];
 
+  if (!checkPermission()) {
+    // If permission check fails, it's likely to be a standard user, let's rerun the program
+    // as root
+    
+    if (geteuid() != 0) {
+      STPrivilegedTask* task = [STPrivilegedTask new];
+      [task setLaunchPath:[NSBundle.mainBundle executablePath]];
+      [task launch];
+    } else {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        showErrorModal(@"You do not have the necessary permissions required to autoinstall this app.");
+      });
+    }
+    return;
+  }
+  
   self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
   self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
 
@@ -163,20 +191,10 @@ void showErrorModal(NSError* error) {
 
               if (task.terminationStatus != 0) {
                 [fileManager removeItemAtPath:tempDir error:nil];
-
-                // If extraction fails, it's likely to be a permission issue let's rerun the program
-                // as root
-
-                if (geteuid() != 0) {
-                  STPrivilegedTask* task = [STPrivilegedTask new];
-                  [task setLaunchPath:[NSBundle.mainBundle executablePath]];
-                  [task launch];
-                } else {
-                  dispatch_async(dispatch_get_main_queue(), ^{
-                    showErrorModal([NSString
-                        stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
-                  });
-                }
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  showErrorModal([NSString
+                      stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
+                });
                 return;
               }
 
