@@ -55,12 +55,12 @@ void showErrorModal(NSError* error) {
   showErrorModal(errorDescription);
 }
 
-bool checkPermission() {
+bool isBundleWritable() {
   auto* testDir = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"test"];
   auto* fileManager = NSFileManager.defaultManager;
-  bool result = [fileManager createDirectoryAtPath:testDir withIntermediateDirectories:true attributes:NULL error:NULL];
+  bool result = [fileManager createDirectoryAtPath:testDir withIntermediateDirectories:true attributes:nil error:nil];
   if (result) {
-    [fileManager removeItemAtPath:testDir error:NULL];
+    [fileManager removeItemAtPath:testDir error:nil];
     return true;
   } else {
     return false;
@@ -119,7 +119,7 @@ bool checkPermission() {
   NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
   NSString* targetAppName = [info valueForKey:@"TargetAppName"];
 
-  if (!checkPermission()) {
+  if (!isBundleWritable()) {
     // If permission check fails, it's likely to be a standard user, let's rerun the program
     // as root
     
