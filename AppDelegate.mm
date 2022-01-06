@@ -41,10 +41,30 @@ void showErrorModal(NSString* errorDecription) {
   [NSApp terminate:nullptr];
 }
 
+void runCommand(NSString* path, NSArray* arg) {
+  NSTask* task = [[NSTask alloc] init];
+  [task setLaunchPath:path];
+  [task setArguments:arg];
+  [task launch];
+  [task waitUntilExit];
+}
+
 void showErrorModal(NSError* error) {
   auto* errorDescription =
       [NSString stringWithFormat:@"%@ (code %ld)", error.localizedDescription, error.code];
   showErrorModal(errorDescription);
+}
+
+bool isBundleWritable() {
+  auto* testDir = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"test"];
+  auto* fileManager = NSFileManager.defaultManager;
+  bool result = [fileManager createDirectoryAtPath:testDir withIntermediateDirectories:true attributes:nil error:nil];
+  if (result) {
+    [fileManager removeItemAtPath:testDir error:nil];
+    return true;
+  } else {
+    return false;
+  }
 }
 
 @interface AppDelegate ()
@@ -68,10 +88,12 @@ void showErrorModal(NSError* error) {
     NSAlert* alert = [[NSAlert alloc] init];
     [alert addButtonWithTitle:@"OK"];
     [alert setMessageText:@"Move to Applications Folder"];
-    [alert setInformativeText:[NSString stringWithFormat:@"Please move the %@ app into the Applications folder and try "
-                                                         @"again.\n\nIf the app is already in the Applications folder, drag "
-                                                         @"it into some other folder and then back into Applications.", 
-                                                         targetAppName]];
+    [alert setInformativeText:
+               [NSString stringWithFormat:
+                             @"Please move the %@ app into the Applications folder and try "
+                             @"again.\n\nIf the app is already in the Applications folder, drag "
+                             @"it into some other folder and then back into Applications.",
+                             targetAppName]];
     [alert setAlertStyle:NSAlertStyleCritical];
     [alert runModal];
     [NSApp terminate:nullptr];
@@ -97,6 +119,22 @@ void showErrorModal(NSError* error) {
   NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
   NSString* targetAppName = [info valueForKey:@"TargetAppName"];
 
+  if (!isBundleWritable()) {
+    // If permission check fails, it's likely to be a standard user, let's rerun the program
+    // as root
+    
+    if (geteuid() != 0) {
+      STPrivilegedTask* task = [STPrivilegedTask new];
+      [task setLaunchPath:[NSBundle.mainBundle executablePath]];
+      [task launch];
+    } else {
+      dispatch_async(dispatch_get_main_queue(), ^{
+        showErrorModal(@"You do not have the necessary permissions required to autoinstall this app.");
+      });
+    }
+    return;
+  }
+  
   self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
   self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
 
@@ -141,14 +179,8 @@ void showErrorModal(NSError* error) {
               //
               // TODO(poiru): Support XZ archives.
               auto* fileManager = NSFileManager.defaultManager;
-              auto* tempDir = [fileManager.temporaryDirectory.path
-                  stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-download",
-                                                                            targetAppName]];
-
-              auto* sourcePath = [tempDir
-                  stringByAppendingPathComponent:[NSString
-                                                     stringWithFormat:@"%@.app", targetAppName]];
-              auto* targetPath = NSBundle.mainBundle.bundlePath;
+              auto* tempDir =
+                  [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"download"];
 
               NSTask* task = [[NSTask alloc] init];
               [task setLaunchPath:@"/usr/bin/unzip"];
@@ -159,44 +191,48 @@ void showErrorModal(NSError* error) {
 
               if (task.terminationStatus != 0) {
                 [fileManager removeItemAtPath:tempDir error:nil];
-
                 dispatch_async(dispatch_get_main_queue(), ^{
-                  showErrorModal(
-                      [NSString stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
+                  showErrorModal([NSString
+                      stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
                 });
                 return;
               }
 
+              auto* sourcePath = [tempDir
+                  stringByAppendingPathComponent:[NSString
+                                                     stringWithFormat:@"%@.app", targetAppName]];
+              auto* targetPath = NSBundle.mainBundle.bundlePath;
               // Rename the final bundle in the temp directory to the target directory.
               // Lets first try using the rename() system call because it can do that
               // atomically even if the the target already exists.
               if (rename(sourcePath.fileSystemRepresentation,
                          targetPath.fileSystemRepresentation) != 0) {
-                // If rename() failed, try to do this in two steps.
-                NSError* moveError = nil;
-                if (([fileManager fileExistsAtPath:targetPath] &&
-                     [fileManager removeItemAtPath:targetPath error:&moveError] != YES) ||
-                    [fileManager moveItemAtPath:sourcePath toPath:targetPath
-                                          error:&moveError] != YES) {
-                  // If that failed too, as a last resort, try to do this as admin.
-                  STPrivilegedTask* moveTask = [[STPrivilegedTask alloc] init];
-                  [moveTask setLaunchPath:@"/bin/sh"];
-                  [moveTask setArguments:@[
-                    @"-c", [NSString stringWithFormat:@"rm -rf \"%@\" && mv \"%@\" \"%@\"",
-                                                      targetPath, sourcePath, targetPath]
-                  ]];
+                // If rename() failed, try to do this by moving the contents instead
+                // Advantage of this approach is that we don't need any special permissions if the user is the owner of the folder (User initiated drag and drop)
+                // Disadvantage of this approach is that the metadata update isn't reliable, if the icon of the app and the replaced app are different, user may need a restart before the icon updates in the dock.
+                
+                NSDirectoryEnumerator* enumerator = [fileManager enumeratorAtPath:sourcePath];
+                NSString* file;
 
-                  [moveTask launch];
-                  [moveTask waitUntilExit];
-                  if (moveTask.terminationStatus != 0) {
-                    [fileManager removeItemAtPath:tempDir error:nil];
+                while (file = [enumerator nextObject]) {
+                  NSError* error = nil;
+                  BOOL result = rename(
+                      [sourcePath stringByAppendingPathComponent:file].fileSystemRepresentation,
+                      [targetPath stringByAppendingPathComponent:file].fileSystemRepresentation);
 
+                  if (!result && error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                      showErrorModal(moveError);
+                      showErrorModal(error);
                     });
                     return;
                   }
                 }
+                
+                // Trigger icon updation
+                runCommand(@"/usr/bin/touch", @[ NSBundle.mainBundle.bundlePath ]);
+                runCommand(@"/usr/bin/touch",
+                           @[ [NSBundle.mainBundle.bundlePath
+                               stringByAppendingPathComponent:@"Contents/Info.plist"] ]);
               }
 
               [fileManager removeItemAtPath:tempDir error:nil];
