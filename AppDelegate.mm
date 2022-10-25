@@ -9,7 +9,32 @@
 #define ARCH_KEY_NAME @"x86_64"
 #endif
 
+#define USER_PREFS_KEY @"FigmaInstallationStarted"
+
 const NSTimeInterval kDefaultTimeoutSecs = 60 * 60 * 12;  // 12 hours
+
+void showRetryModal() {
+  NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
+  NSDictionary* downloadURLs = [info objectForKey:@"TargetDownloadURLs"];
+  NSURL* downloadURL = [NSURL URLWithString:[downloadURLs valueForKey:ARCH_KEY_NAME]];
+  NSString* targetAppName = [info valueForKey:@"TargetAppName"];
+    
+  NSAlert* alert = [[NSAlert alloc] init];
+  [alert addButtonWithTitle:@"Download manually"];
+  [alert addButtonWithTitle:@"Retry"];
+  [alert setMessageText:[NSString
+                         stringWithFormat:@"%@ Last Installation Failed", targetAppName]];
+  [alert setInformativeText:[NSString stringWithFormat:@"Download %@ manually to continue.",
+                             targetAppName]];
+  [alert setAlertStyle:NSAlertStyleCritical];
+  
+  [NSApp activateIgnoringOtherApps:YES];
+  if ([alert runModal] == NSAlertFirstButtonReturn) {
+    [[NSWorkspace sharedWorkspace] openURL:downloadURL];
+    [NSApp terminate:nullptr];
+  }
+  
+}
 
 void showErrorModal(NSString* errorDecription) {
   NSDictionary* info = [[NSBundle mainBundle] infoDictionary];
@@ -78,6 +103,13 @@ bool isBundleWritable() {
 @implementation AppDelegate
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
+  
+  
+  if([[NSUserDefaults standardUserDefaults] boolForKey:USER_PREFS_KEY]) {
+    showRetryModal();
+  }
+  [[NSUserDefaults standardUserDefaults] setBool:true forKey:USER_PREFS_KEY];
+  
   // On macOS 10.12+, app bundles downloaded from the internet are launched
   // from a randomized path until the user moves it to another folder with
   // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
@@ -239,6 +271,7 @@ bool isBundleWritable() {
 
               dispatch_async(dispatch_get_main_queue(), ^{
                 [self launchInstalledApp];
+                [[NSUserDefaults standardUserDefaults] setBool:false forKey:USER_PREFS_KEY];
               });
             }];
   [self.task resume];
