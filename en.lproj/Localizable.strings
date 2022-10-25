@@ -1,0 +1,50 @@
+/* Title of dialog shown when automatic installation has failed. %@ is the name of the app. */
+"errorDialog.title" = "%@ Automatic Installation Failed";
+
+/* Message in dialog shown when automatic installation has failed, prompting user to download manually. %@ is the name of the app. */
+"errorDialog.downloadManuallyMessage" = "Download %@ manually to continue.";
+
+/* Message in dialog shown when automatic installation has failed, prompting user to contact support. This message is followed by an error shown on the next line.  %@ is the name of the app. */
+"errorDialog.contactSupportMessage" = "You may also contact %@ support with this error information:";
+
+/* Button in dialog shown when automatic installation has failed. Clicking this button will open a URL for the user to manually download the app. */
+"errorDialog.downloadManuallyButton" = "Download manually";
+
+/* Title of a dialog prompting user to move the app into their macOS Applications folder. */
+"moveToApplicationsDialog.title" = "Move to Applications Folder";
+
+/* Message in dialog prompting user to move the app into their macOS Applications folder. %@ is the name of the app. This message is broken into two parts, with "\n\n" included to generate an empty line between the two parts. */
+"moveToApplicationsDialog.message" = "Please move the %@ app into the Applications folder and try again.\n\nIf the app is already in the Applications folder, drag it into some other folder and then back into Applications.";
+
+/* Label for a generic confirmation button that acknowledges some message. */
+"dialog.okButton" = "OK";
+
+/* Label for the generic cancel button that closes dialogs without taking an action. */
+"dialog.cancelButton" = "Cancel";
+
+/* Error message shown alongside its numeric code. %@ is the error message itself, and %ld is the numeric code for that error message. */
+"error.errorWithCode" = "%@ (code %ld)";
+
+/* Generic error message shown when initial installer checks fail. %i is the numeric code of the error. */
+"error.initialCheckFailed" = "Initial check failed: %i";
+
+/* Error message shown when the installer does not have the required permissions to install the app. */
+"error.wrongPermissions" = "You do not have the necessary permissions required to autoinstall this app.";
+
+/* Error message shown when the app fails to download due to an HTTP error. %lu is the numeric error code for the HTTP error. */
+"error.downloadFailed" = "Failed to download, HTTP: %lu";
+
+/* Error message shwon when the installer fails to extract the zipped application. %i is the numeric code of the error. */
+"error.extractFailed" = "Failed to extract: %i";
+
+/* Title of the installer dialog. %@ is the name of the app that is being installed. */
+"installerDialog.title" = "%@ Installer";
+
+/* Message shown in the installer dialog indicating that the app is currently being downloaded. %@ is the name of the app. */
+"installerDialog.downloadingMessage" = "Downloading %@...";
+
+/* Message shwon in the installer dialog indicating that the app is now being installed. %@ is the name of the app. */
+"installerDialog.installingMessage" = "Installing %@...";
+
+/* Label for menu item used to quit the application. %@ is the name of the application. */
+"menu.quitItem" = "Quit %@";

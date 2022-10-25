@@ -11,6 +11,8 @@
 		27227274263AD71400AFC28A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 27227273263AD71400AFC28A /* main.m */; };
 		27BF31042668EF7F001B8384 /* STPrivilegedTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 27BF31032668EF7F001B8384 /* STPrivilegedTask.m */; };
 		27D3053E263D28BC00BBEBA5 /* App.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27227270263AD71400AFC28A /* App.xib */; };
+		4000AD3C283D8A4800D07897 /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 4000AD3B283D8A4800D07897 /* en.lproj */; };
+		40B4470C28511CFC00E28ED2 /* ja.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 40B4470B28511CFC00E28ED2 /* ja.lproj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +23,8 @@
 		27227272263AD71400AFC28A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		27227273263AD71400AFC28A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		27BF31032668EF7F001B8384 /* STPrivilegedTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPrivilegedTask.m; sourceTree = "<group>"; };
+		4000AD3B283D8A4800D07897 /* en.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = en.lproj; sourceTree = "<group>"; };
+		40B4470B28511CFC00E28ED2 /* ja.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ja.lproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +41,8 @@
 		2722725E263AD71300AFC28A = {
 			isa = PBXGroup;
 			children = (
+				40B4470B28511CFC00E28ED2 /* ja.lproj */,
+				4000AD3B283D8A4800D07897 /* en.lproj */,
 				2722726A263AD71300AFC28A /* AppDelegate.h */,
 				2722726B263AD71300AFC28A /* AppDelegate.mm */,
 				27227270263AD71400AFC28A /* App.xib */,
@@ -96,6 +102,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ja,
 			);
 			mainGroup = 2722725E263AD71300AFC28A;
 			productRefGroup = 27227268263AD71300AFC28A /* Products */;
@@ -113,6 +120,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				27D3053E263D28BC00BBEBA5 /* App.xib in Resources */,
+				40B4470C28511CFC00E28ED2 /* ja.lproj in Resources */,
+				4000AD3C283D8A4800D07897 /* en.lproj in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

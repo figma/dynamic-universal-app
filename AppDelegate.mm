@@ -19,18 +19,22 @@ void showErrorModal(NSString* errorDecription) {
 
   NSString* errorText = @"";
   if (errorDecription) {
-    errorText = [NSString stringWithFormat:@"\n\nYou may also contact %@ support with this error "
-                                           @"information:\n\n%@",
-                                           targetAppName, errorDecription];
+    NSString* contactSupportMessage =
+        [NSString stringWithFormat:(NSLocalizedString(@"errorDialog.contactSupportMessage", nil)),
+                                   targetAppName];
+    errorText = [NSString stringWithFormat:@"\n\n%@\n\n%@", contactSupportMessage, errorDecription];
   }
 
   NSAlert* alert = [[NSAlert alloc] init];
-  [alert addButtonWithTitle:@"Download manually"];
-  [alert addButtonWithTitle:@"Cancel"];
-  [alert setMessageText:[NSString
-                            stringWithFormat:@"%@ Automatic Installation Failed", targetAppName]];
-  [alert setInformativeText:[NSString stringWithFormat:@"Download %@ manually to continue.%@",
-                                                       targetAppName, errorText]];
+  [alert addButtonWithTitle:(NSLocalizedString(@"errorDialog.downloadManuallyButton", nil))];
+  [alert addButtonWithTitle:(NSLocalizedString(@"dialog.cancelButton", nil))];
+  [alert setMessageText:[NSString stringWithFormat:(NSLocalizedString(@"errorDialog.title", nil)),
+                                                   targetAppName]];
+  NSString* downloadManuallyMessage =
+      [NSString stringWithFormat:(NSLocalizedString(@"errorDialog.downloadManuallyMessage", nil)),
+                                 targetAppName];
+  [alert
+      setInformativeText:[NSString stringWithFormat:@"%@%@", downloadManuallyMessage, errorText]];
   [alert setAlertStyle:NSAlertStyleCritical];
 
   [NSApp activateIgnoringOtherApps:YES];
@@ -51,14 +55,18 @@ void runCommand(NSString* path, NSArray* arg) {
 
 void showErrorModal(NSError* error) {
   auto* errorDescription =
-      [NSString stringWithFormat:@"%@ (code %ld)", error.localizedDescription, error.code];
+      [NSString stringWithFormat:(NSLocalizedString(@"error.errorWithCode", nil)),
+                                 error.localizedDescription, error.code];
   showErrorModal(errorDescription);
 }
 
 bool isBundleWritable() {
   auto* testDir = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"test"];
   auto* fileManager = NSFileManager.defaultManager;
-  bool result = [fileManager createDirectoryAtPath:testDir withIntermediateDirectories:true attributes:nil error:nil];
+  bool result = [fileManager createDirectoryAtPath:testDir
+                       withIntermediateDirectories:true
+                                        attributes:nil
+                                             error:nil];
   if (result) {
     [fileManager removeItemAtPath:testDir error:nil];
     return true;
@@ -71,6 +79,8 @@ bool isBundleWritable() {
 @property(weak) IBOutlet NSWindow* window;
 @property(weak) IBOutlet NSTextField* label;
 @property(weak) IBOutlet NSProgressIndicator* progressIndicator;
+@property(weak) IBOutlet NSButton* cancelButton;
+@property(weak) IBOutlet NSMenuItem* quitMenuItem;
 
 @property NSURLSessionDownloadTask* task;
 @end
@@ -78,6 +88,11 @@ bool isBundleWritable() {
 @implementation AppDelegate
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
+  // Localize menu items
+  NSString* installerName = [NSBundle.mainBundle.infoDictionary valueForKey:@"CFBundleName"];
+  self.quitMenuItem.title =
+      [NSString stringWithFormat:NSLocalizedString(@"menu.quitItem", nil), installerName];
+
   // On macOS 10.12+, app bundles downloaded from the internet are launched
   // from a randomized path until the user moves it to another folder with
   // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
@@ -86,14 +101,12 @@ bool isBundleWritable() {
     NSString* targetAppName = [info valueForKey:@"TargetAppName"];
 
     NSAlert* alert = [[NSAlert alloc] init];
-    [alert addButtonWithTitle:@"OK"];
-    [alert setMessageText:@"Move to Applications Folder"];
-    [alert setInformativeText:
-               [NSString stringWithFormat:
-                             @"Please move the %@ app into the Applications folder and try "
-                             @"again.\n\nIf the app is already in the Applications folder, drag "
-                             @"it into some other folder and then back into Applications.",
-                             targetAppName]];
+    [alert addButtonWithTitle:NSLocalizedString(@"dialog.okButton", nil)];
+    [alert setMessageText:NSLocalizedString(@"moveToApplicationsDialog.title", nil)];
+    [alert setInformativeText:[NSString
+                                  stringWithFormat:(NSLocalizedString(
+                                                       @"moveToApplicationsDialog.message", nil)),
+                                                   targetAppName]];
     [alert setAlertStyle:NSAlertStyleCritical];
     [alert runModal];
     [NSApp terminate:nullptr];
@@ -107,8 +120,8 @@ bool isBundleWritable() {
   [checkTask launch];
   [checkTask waitUntilExit];
   if (checkTask.terminationStatus != 0) {
-    showErrorModal(
-        [NSString stringWithFormat:@"Initial check failed: %i", checkTask.terminationStatus]);
+    showErrorModal([NSString stringWithFormat:(NSLocalizedString(@"error.initialCheckFailed", nil)),
+                                              checkTask.terminationStatus]);
     return;
   }
 }
@@ -122,21 +135,25 @@ bool isBundleWritable() {
   if (!isBundleWritable()) {
     // If permission check fails, it's likely to be a standard user, let's rerun the program
     // as root
-    
+
     if (geteuid() != 0) {
       STPrivilegedTask* task = [STPrivilegedTask new];
       [task setLaunchPath:[NSBundle.mainBundle executablePath]];
       [task launch];
     } else {
       dispatch_async(dispatch_get_main_queue(), ^{
-        showErrorModal(@"You do not have the necessary permissions required to autoinstall this app.");
+        showErrorModal(NSLocalizedString(@"error.wrongPermissions", nil));
       });
     }
     return;
   }
-  
-  self.window.title = [NSString stringWithFormat:@"%@ Installer", targetAppName];
-  self.label.stringValue = [NSString stringWithFormat:@"Downloading %@...", targetAppName];
+
+  self.window.title =
+      [NSString stringWithFormat:(NSLocalizedString(@"installerDialog.title", nil)), targetAppName];
+  self.label.stringValue =
+      [NSString stringWithFormat:(NSLocalizedString(@"installerDialog.downloadingMessage", nil)),
+                                 targetAppName];
+  self.cancelButton.title = NSLocalizedString(@"dialog.cancelButton", nil);
 
   [self.window setIsVisible:TRUE];
   [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
@@ -160,8 +177,9 @@ bool isBundleWritable() {
                 const auto statusCode = ((NSHTTPURLResponse*)response).statusCode;
                 if (statusCode < 200 || statusCode >= 300) {
                   dispatch_async(dispatch_get_main_queue(), ^{
-                    showErrorModal(
-                        [NSString stringWithFormat:@"Failed to download, HTTP: %lu", statusCode]);
+                    showErrorModal([NSString
+                        stringWithFormat:(NSLocalizedString(@"error.downloadFailed", nil)),
+                                         statusCode]);
                   });
 
                   return;
@@ -169,8 +187,9 @@ bool isBundleWritable() {
               }
 
               dispatch_async(dispatch_get_main_queue(), ^{
-                self.label.stringValue =
-                    [NSString stringWithFormat:@"Installing %@...", targetAppName];
+                self.label.stringValue = [NSString
+                    stringWithFormat:(NSLocalizedString(@"installerDialog.installingMessage", nil)),
+                                     targetAppName];
               });
 
               // Big Sur and later have APIs to extract archives, but we need
@@ -192,8 +211,9 @@ bool isBundleWritable() {
               if (task.terminationStatus != 0) {
                 [fileManager removeItemAtPath:tempDir error:nil];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                  showErrorModal([NSString
-                      stringWithFormat:@"Failed to extract: %i", task.terminationStatus]);
+                  showErrorModal(
+                      [NSString stringWithFormat:(NSLocalizedString(@"error.extractFailed", nil)),
+                                                 task.terminationStatus]);
                 });
                 return;
               }
@@ -208,9 +228,12 @@ bool isBundleWritable() {
               if (rename(sourcePath.fileSystemRepresentation,
                          targetPath.fileSystemRepresentation) != 0) {
                 // If rename() failed, try to do this by moving the contents instead
-                // Advantage of this approach is that we don't need any special permissions if the user is the owner of the folder (User initiated drag and drop)
-                // Disadvantage of this approach is that the metadata update isn't reliable, if the icon of the app and the replaced app are different, user may need a restart before the icon updates in the dock.
-                
+                // Advantage of this approach is that we don't need any special permissions if the
+                // user is the owner of the folder (User initiated drag and drop) Disadvantage of
+                // this approach is that the metadata update isn't reliable, if the icon of the app
+                // and the replaced app are different, user may need a restart before the icon
+                // updates in the dock.
+
                 NSDirectoryEnumerator* enumerator = [fileManager enumeratorAtPath:sourcePath];
                 NSString* file;
 
@@ -227,7 +250,7 @@ bool isBundleWritable() {
                     return;
                   }
                 }
-                
+
                 // Trigger icon updation
                 runCommand(@"/usr/bin/touch", @[ NSBundle.mainBundle.bundlePath ]);
                 runCommand(@"/usr/bin/touch",
