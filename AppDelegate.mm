@@ -88,15 +88,23 @@ bool isBundleWritable() {
 @implementation AppDelegate
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
+  NSFileManager *fileManager = [NSFileManager defaultManager];
+
   // Localize menu items
   NSString* installerName = [NSBundle.mainBundle.infoDictionary valueForKey:@"CFBundleName"];
   self.quitMenuItem.title =
       [NSString stringWithFormat:NSLocalizedString(@"menu.quitItem", nil), installerName];
 
-  // On macOS 10.12+, app bundles downloaded from the internet are launched
-  // from a randomized path until the user moves it to another folder with
-  // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
-  if ([NSBundle.mainBundle.bundlePath hasPrefix:@"/private/var/folders/"]) {
+  if (
+    // On macOS 10.12+, app bundles downloaded from the internet are launched
+    // from a randomized path until the user moves it to another folder with
+    // Finder. See: https://github.com/potionfactory/LetsMove/issues/56
+    [NSBundle.mainBundle.bundlePath hasPrefix:@"/private/var/folders/"] ||
+
+    // Make sure the installer isn't being launched from a read-only location
+    // like inside a DMG.
+    ![fileManager isWritableFileAtPath:NSBundle.mainBundle.bundlePath]
+  ) {
     NSDictionary* info = NSBundle.mainBundle.infoDictionary;
     NSString* targetAppName = [info valueForKey:@"TargetAppName"];
 
