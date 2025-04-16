@@ -1,0 +1,50 @@
+/* Title of dialog shown when automatic installation has failed. %1$@ is the name of the app. */
+"errorDialog.title" = "%1$@ 자동 설치 실패";
+
+/* Message in dialog shown when automatic installation has failed, prompting user to download manually. %1$@ is the name of the app. */
+"errorDialog.downloadManuallyMessage" = "계속하려면 %1$@을(를) 수동으로 다운로드하십시오.";
+
+/* Message in dialog shown when automatic installation has failed, prompting user to contact support. This message is followed by an error shown on the next line.  %1$@ is the name of the app. */
+"errorDialog.contactSupportMessage" = "이 오류 정보를 사용하여 %1$@ 지원팀에 문의할 수도 있습니다.";
+
+/* Button in dialog shown when automatic installation has failed. Clicking this button will open a URL for the user to manually download the app. */
+"errorDialog.downloadManuallyButton" = "수동으로 다운로드";
+
+/* Title of a dialog prompting user to move the app into their macOS Applications folder. */
+"moveToApplicationsDialog.title" = "애플리케이션 폴더로 이동";
+
+/* Message in dialog prompting user to move the app into their macOS Applications folder. %1$@ is the name of the app. This message is broken into two parts, with "\n\n" included to generate an empty line between the two parts. */
+"moveToApplicationsDialog.message" = "%1$@ 앱을 애플리케이션 폴더로 이동한 후 다시 시도하십시오.\n\n앱이 이미 애플리케이션 폴더에 있는 경우 다른 폴더로 이동한 다음 다시 애플리케이션으로 이동합니다.";
+
+/* Label for a generic confirmation button that acknowledges some message. */
+"dialog.okButton" = "확인";
+
+/* Label for the generic cancel button that closes dialogs without taking an action. */
+"dialog.cancelButton" = "취소";
+
+/* Error message shown alongside its numeric code. %1$@ is the error message itself, and %2$ld is the numeric code for that error message. */
+"error.errorWithCode" = "%1$@ (코드 %2$ld)";
+
+/* Generic error message shown when initial installer checks fail. %1$i is the numeric code of the error. */
+"error.initialCheckFailed" = "초기 확인 실패: %1$i";
+
+/* Error message shown when the installer does not have the required permissions to install the app. */
+"error.wrongPermissions" = "이 앱을 자동 설치할 수 있는 권한이 없습니다.";
+
+/* Error message shown when the app fails to download due to an HTTP error. %1$lu is the numeric error code for the HTTP error. */
+"error.downloadFailed" = "다운로드에 실패했습니다. HTTP: %1$lu";
+
+/* Error message shwon when the installer fails to extract the zipped application. %1$i is the numeric code of the error. */
+"error.extractFailed" = "추출 실패: %1$i";
+
+/* Title of the installer dialog. %1$@ is the name of the app that is being installed. */
+"installerDialog.title" = "%1$@ 설치 프로그램";
+
+/* Message shown in the installer dialog indicating that the app is currently being downloaded. %1$@ is the name of the app. */
+"installerDialog.downloadingMessage" = "%1$@ 다운로드 중...";
+
+/* Message shwon in the installer dialog indicating that the app is now being installed. %1$@ is the name of the app. */
+"installerDialog.installingMessage" = "%1$@ 설치 중...";
+
+/* Label for menu item used to quit the application. %1$@ is the name of the application. */
+"menu.quitItem" = "%1$@ 종료";
