@@ -13,6 +13,9 @@
 		27D3053E263D28BC00BBEBA5 /* App.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27227270263AD71400AFC28A /* App.xib */; };
 		4000AD3C283D8A4800D07897 /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 4000AD3B283D8A4800D07897 /* en.lproj */; };
 		40B4470C28511CFC00E28ED2 /* ja.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 40B4470B28511CFC00E28ED2 /* ja.lproj */; };
+		611C771B2DBB0CF000427809 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 611C77132DBB0CF000427809 /* Localizable.strings */; };
+		611C771C2DBB0CF000427809 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 611C77162DBB0CF000427809 /* Localizable.strings */; };
+		611C771D2DBB0CF000427809 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 611C77192DBB0CF000427809 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +28,9 @@
 		27BF31032668EF7F001B8384 /* STPrivilegedTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPrivilegedTask.m; sourceTree = "<group>"; };
 		4000AD3B283D8A4800D07897 /* en.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = en.lproj; sourceTree = "<group>"; };
 		40B4470B28511CFC00E28ED2 /* ja.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ja.lproj; sourceTree = "<group>"; };
+		611C77122DBB0CF000427809 /* es-es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-es"; path = Localizable.strings; sourceTree = "<group>"; };
+		611C77152DBB0CF000427809 /* ko-kr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "ko-kr"; path = Localizable.strings; sourceTree = "<group>"; };
+		611C77182DBB0CF000427809 /* pt-br */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-br"; path = Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +56,9 @@
 				27BF31032668EF7F001B8384 /* STPrivilegedTask.m */,
 				27227273263AD71400AFC28A /* main.m */,
 				27227268263AD71300AFC28A /* Products */,
+				611C77142DBB0CF000427809 /* es-es.lproj */,
+				611C77172DBB0CF000427809 /* ko-kr.lproj */,
+				611C771A2DBB0CF000427809 /* pt-br.lproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -59,6 +68,30 @@
 				27227267263AD71300AFC28A /* DynamicUniversalApp.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		611C77142DBB0CF000427809 /* es-es.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				611C77132DBB0CF000427809 /* Localizable.strings */,
+			);
+			path = "es-es.lproj";
+			sourceTree = "<group>";
+		};
+		611C77172DBB0CF000427809 /* ko-kr.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				611C77162DBB0CF000427809 /* Localizable.strings */,
+			);
+			path = "ko-kr.lproj";
+			sourceTree = "<group>";
+		};
+		611C771A2DBB0CF000427809 /* pt-br.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				611C77192DBB0CF000427809 /* Localizable.strings */,
+			);
+			path = "pt-br.lproj";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -103,6 +136,12 @@
 				en,
 				Base,
 				ja,
+				"es-es",
+				"ko-kr",
+				"pt-br",
+				"ko-KR",
+				"pt-BR",
+				"es-ES",
 			);
 			mainGroup = 2722725E263AD71300AFC28A;
 			productRefGroup = 27227268263AD71300AFC28A /* Products */;
@@ -122,6 +161,9 @@
 				27D3053E263D28BC00BBEBA5 /* App.xib in Resources */,
 				40B4470C28511CFC00E28ED2 /* ja.lproj in Resources */,
 				4000AD3C283D8A4800D07897 /* en.lproj in Resources */,
+				611C771B2DBB0CF000427809 /* Localizable.strings in Resources */,
+				611C771C2DBB0CF000427809 /* Localizable.strings in Resources */,
+				611C771D2DBB0CF000427809 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +181,33 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		611C77132DBB0CF000427809 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				611C77122DBB0CF000427809 /* es-es */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		611C77162DBB0CF000427809 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				611C77152DBB0CF000427809 /* ko-kr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		611C77192DBB0CF000427809 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				611C77182DBB0CF000427809 /* pt-br */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		27227276263AD71400AFC28A /* Debug */ = {
