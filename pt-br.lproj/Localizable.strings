@@ -1,50 +1,50 @@
 /* Title of dialog shown when automatic installation has failed. %1$@ is the name of the app. */
-"errorDialog.title" = "%1$@の自動インストールに失敗しました";
+"errorDialog.title" = "%1$@ Falha na instalação automática";
 
 /* Message in dialog shown when automatic installation has failed, prompting user to download manually. %1$@ is the name of the app. */
-"errorDialog.downloadManuallyMessage" = "続行するには%1$@を手動でダウンロードしてください。";
+"errorDialog.downloadManuallyMessage" = "Baixe %1$@ manualmente para continuar.";
 
 /* Message in dialog shown when automatic installation has failed, prompting user to contact support. This message is followed by an error shown on the next line.  %1$@ is the name of the app. */
-"errorDialog.contactSupportMessage" = "このエラー情報について%1$@サポートまでご連絡いただくことも可能です:";
+"errorDialog.contactSupportMessage" = "Você também pode entrar em contato com o suporte do %1$@ com estas informações de erro:";
 
 /* Button in dialog shown when automatic installation has failed. Clicking this button will open a URL for the user to manually download the app. */
-"errorDialog.downloadManuallyButton" = "手動でダウンロードする";
+"errorDialog.downloadManuallyButton" = "Baixar manualmente";
 
 /* Title of a dialog prompting user to move the app into their macOS Applications folder. */
-"moveToApplicationsDialog.title" = "[アプリケーション]フォルダに移動する";
+"moveToApplicationsDialog.title" = "Mover para a pasta Aplicativos";
 
 /* Message in dialog prompting user to move the app into their macOS Applications folder. %1$@ is the name of the app. This message is broken into two parts, with "\n\n" included to generate an empty line between the two parts. */
-"moveToApplicationsDialog.message" = "%1$@アプリを[アプリケーション]フォルダに移動してからもう一度お試しください。\n\nアプリが既に[アプリケーション]フォルダにある場合は、アプリをドラックして他のフォルダにいったん移動した後、[アプリケーション]に戻してください。";
+"moveToApplicationsDialog.message" = "Mova o app %1$@ para a pasta Aplicativos e tente novamente.\n\nSe o app já estiver na pasta Aplicativos, arraste-o para outra pasta e depois de volta para Aplicativos.";
 
 /* Label for a generic confirmation button that acknowledges some message. */
 "dialog.okButton" = "OK";
 
 /* Label for the generic cancel button that closes dialogs without taking an action. */
-"dialog.cancelButton" = "キャンセル";
+"dialog.cancelButton" = "Cancelar";
 
 /* Error message shown alongside its numeric code. %1$@ is the error message itself, and %2$ld is the numeric code for that error message. */
-"error.errorWithCode" = "%1$@ (コード%2$ld)";
+"error.errorWithCode" = "%1$@ (código %2$ld)";
 
 /* Generic error message shown when initial installer checks fail. %1$i is the numeric code of the error. */
-"error.initialCheckFailed" = "初期のチェックに失敗しました: %1$i";
+"error.initialCheckFailed" = "Falha na verificação inicial: %1$i";
 
 /* Error message shown when the installer does not have the required permissions to install the app. */
-"error.wrongPermissions" = "このアプリの自動インストールに必要な権限がありません。";
+"error.wrongPermissions" = "Você não tem as permissões necessárias para autoinstalar este app.";
 
 /* Error message shown when the app fails to download due to an HTTP error. %1$lu is the numeric error code for the HTTP error. */
-"error.downloadFailed" = "ダウンロードに失敗しました、HTTP: %1$lu";
+"error.downloadFailed" = "Falha ao baixar, HTTP: %1$lu";
 
 /* Error message shwon when the installer fails to extract the zipped application. %1$i is the numeric code of the error. */
-"error.extractFailed" = "展開に失敗しました: %1$i";
+"error.extractFailed" = "Falha ao extrair: %1$i";
 
 /* Title of the installer dialog. %1$@ is the name of the app that is being installed. */
-"installerDialog.title" = "%1$@インストーラー";
+"installerDialog.title" = "%1$@ Instalador";
 
 /* Message shown in the installer dialog indicating that the app is currently being downloaded. %1$@ is the name of the app. */
-"installerDialog.downloadingMessage" = "%1$@をダウンロードしています...";
+"installerDialog.downloadingMessage" = "Baixando %1$@...";
 
 /* Message shwon in the installer dialog indicating that the app is now being installed. %1$@ is the name of the app. */
-"installerDialog.installingMessage" = "%1$@をインストールしています...";
+"installerDialog.installingMessage" = "Instalando %1$@...";
 
 /* Label for menu item used to quit the application. %1$@ is the name of the application. */
-"menu.quitItem" = "%1$@を終了";
+"menu.quitItem" = "Sair do %1$@";
