@@ -18,6 +18,7 @@
 		611C771D2DBB0CF000427809 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 611C77192DBB0CF000427809 /* Localizable.strings */; };
 		6972FEFB2E0F384500CDE7A4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6972FEF92E0F384500CDE7A4 /* Localizable.strings */; };
 		D0753E2D2E97271800DF12DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D0753E2B2E97271800DF12DC /* Localizable.strings */; };
+		D0753E352E97291C00DF12DC /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D0753E332E97291C00DF12DC /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		611C77182DBB0CF000427809 /* pt-br */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-br"; path = Localizable.strings; sourceTree = "<group>"; };
 		6972FEF82E0F384500CDE7A4 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = Localizable.strings; sourceTree = "<group>"; };
 		D0753E2A2E97271800DF12DC /* fr-fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr-fr"; path = Localizable.strings; sourceTree = "<group>"; };
+		D0753E322E97291C00DF12DC /* de-de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "de-de"; path = Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +53,7 @@
 		2722725E263AD71300AFC28A = {
 			isa = PBXGroup;
 			children = (
+				D0753E342E97291C00DF12DC /* de-de.lproj */,
 				D0753E2C2E97271800DF12DC /* fr-fr.lproj */,
 				6972FEFA2E0F384500CDE7A4 /* es-419.lproj */,
 				40B4470B28511CFC00E28ED2 /* ja.lproj */,
@@ -116,6 +119,14 @@
 			path = "fr-fr.lproj";
 			sourceTree = "<group>";
 		};
+		D0753E342E97291C00DF12DC /* de-de.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				D0753E332E97291C00DF12DC /* Localizable.strings */,
+			);
+			path = "de-de.lproj";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -167,6 +178,8 @@
 				"es-419",
 				"fr-fr",
 				"fr-FR",
+				"de-de",
+				"de-DE",
 			);
 			mainGroup = 2722725E263AD71300AFC28A;
 			productRefGroup = 27227268263AD71300AFC28A /* Products */;
@@ -187,6 +200,7 @@
 				40B4470C28511CFC00E28ED2 /* ja.lproj in Resources */,
 				4000AD3C283D8A4800D07897 /* en.lproj in Resources */,
 				6972FEFB2E0F384500CDE7A4 /* Localizable.strings in Resources */,
+				D0753E352E97291C00DF12DC /* Localizable.strings in Resources */,
 				611C771B2DBB0CF000427809 /* Localizable.strings in Resources */,
 				D0753E2D2E97271800DF12DC /* Localizable.strings in Resources */,
 				611C771C2DBB0CF000427809 /* Localizable.strings in Resources */,
@@ -246,6 +260,14 @@
 			isa = PBXVariantGroup;
 			children = (
 				D0753E2A2E97271800DF12DC /* fr-fr */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		D0753E332E97291C00DF12DC /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D0753E322E97291C00DF12DC /* de-de */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
