@@ -1,0 +1,50 @@
+/* Title of dialog shown when automatic installation has failed. %1$@ is the name of the app. */
+"errorDialog.title" = "Automatische Installation von %1$@ fehlgeschlagen";
+
+/* Message in dialog shown when automatic installation has failed, prompting user to download manually. %1$@ is the name of the app. */
+"errorDialog.downloadManuallyMessage" = "Lade %1$@ manuell herunter, um fortzufahren.";
+
+/* Message in dialog shown when automatic installation has failed, prompting user to contact support. This message is followed by an error shown on the next line.  %1$@ is the name of the app. */
+"errorDialog.contactSupportMessage" = "Du kannst dich auch mit diesen Fehlerinformationen an den %1$@-Support wenden:";
+
+/* Button in dialog shown when automatic installation has failed. Clicking this button will open a URL for the user to manually download the app. */
+"errorDialog.downloadManuallyButton" = "Manuell herunterladen";
+
+/* Title of a dialog prompting user to move the app into their macOS Applications folder. */
+"moveToApplicationsDialog.title" = "In den Ordner „Programme“ verschieben";
+
+/* Message in dialog prompting user to move the app into their macOS Applications folder. %1$@ is the name of the app. This message is broken into two parts, with "\n\n" included to generate an empty line between the two parts. */
+"moveToApplicationsDialog.message" = "Bitte verschiebe die %1$@-App in den Ordner „Programme“ und versuche es erneut.\n\nWenn sich die App bereits im Ordner „Programme“ befindet, ziehe sie in einen anderen Ordner und dann zurück in den Ordner „Programme“.";
+
+/* Label for a generic confirmation button that acknowledges some message. */
+"dialog.okButton" = "OK";
+
+/* Label for the generic cancel button that closes dialogs without taking an action. */
+"dialog.cancelButton" = "Abbrechen";
+
+/* Error message shown alongside its numeric code. %1$@ is the error message itself, and %2$ld is the numeric code for that error message. */
+"error.errorWithCode" = "%1$@ (Code %2$ld)";
+
+/* Generic error message shown when initial installer checks fail. %1$i is the numeric code of the error. */
+"error.initialCheckFailed" = "Erste Überprüfung fehlgeschlagen: %1$i";
+
+/* Error message shown when the installer does not have the required permissions to install the app. */
+"error.wrongPermissions" = "Du hast nicht die erforderlichen Berechtigungen, um diese App automatisch zu installieren.";
+
+/* Error message shown when the app fails to download due to an HTTP error. %1$lu is the numeric error code for the HTTP error. */
+"error.downloadFailed" = "Herunterladen fehlgeschlagen, HTTP: %1$lu";
+
+/* Error message shwon when the installer fails to extract the zipped application. %1$i is the numeric code of the error. */
+"error.extractFailed" = "Extrahieren fehlgeschlagen: %1$i";
+
+/* Title of the installer dialog. %1$@ is the name of the app that is being installed. */
+"installerDialog.title" = "%1$@-Installationsprogramm";
+
+/* Message shown in the installer dialog indicating that the app is currently being downloaded. %1$@ is the name of the app. */
+"installerDialog.downloadingMessage" = "%1$@ wird heruntergeladen...";
+
+/* Message shwon in the installer dialog indicating that the app is now being installed. %1$@ is the name of the app. */
+"installerDialog.installingMessage" = "%1$@ wird installiert...";
+
+/* Label for menu item used to quit the application. %1$@ is the name of the application. */
+"menu.quitItem" = "Beende %1$@";
