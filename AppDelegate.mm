@@ -309,13 +309,18 @@ bool isBundleWritable() {
   // Spawn a sh process to relaunch the installed app after we exit. Otherwise
   // the new app might not launch if this stub app is already running at the
   // path.
+  // Pass bundlePath via environment variable to avoid shell injection through
+  // malicious directory names.
   NSTask* launchTask = [[NSTask alloc] init];
   [launchTask setLaunchPath:@"/bin/sh"];
   [launchTask setArguments:@[
     @"-c",
-    [NSString stringWithFormat:@"sleep 1; /usr/bin/open %s \"%@\"",
-                               self.window.isMainWindow ? "" : "-g", NSBundle.mainBundle.bundlePath]
+    [NSString stringWithFormat:@"sleep 1; /usr/bin/open %s \"$BUNDLE_PATH\"",
+                               self.window.isMainWindow ? "" : "-g"]
   ]];
+  NSMutableDictionary* env = [NSProcessInfo.processInfo.environment mutableCopy];
+  env[@"BUNDLE_PATH"] = NSBundle.mainBundle.bundlePath;
+  [launchTask setEnvironment:env];
   [launchTask launch];
   [NSApp terminate:nullptr];
 }
